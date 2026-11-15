@@ -52,7 +52,10 @@ function feedback(view: WorkspaceView, width: number, ink: Ink): string[] {
         lines.push("", bold(`${index + 1}. ${label[0]?.toUpperCase()}${label.slice(1)}`));
         paragraph(ink.muted(`“${safe(shown(suggestion.original))}”`));
         paragraph(safe(suggestion.explanation));
-        if (suggestion.alternatives.length) paragraph(`British alternatives: ${suggestion.alternatives.map(safe).join(" / ")}`);
+        for (const alternative of suggestion.alternatives) {
+          const label = suggestion.category === "british_usage" ? "British alternative" : "Example rewrite";
+          paragraph(`${ink.accent(`${label} (optional):`)} ${safe(shown(alternative))}`);
+        }
         if (suggestion.uncertainty) paragraph(ink.warning(`Uncertain: ${safe(suggestion.uncertainty)}`));
       });
     }
@@ -69,10 +72,9 @@ function actions(view: WorkspaceView): { key: WorkspaceAction; label: string }[]
   const list: { key: WorkspaceAction; label: string }[] = [];
   if (view.busy) list.push({ key: "stop", label: "Cancel review" });
   else if (!view.delivering && !view.uncertain && view.draft.trim()) list.push({ key: "review", label: view.draft === view.mandatoryDraft ? "Edit draft first" : view.error ? "Retry review" : "Review and send if clear" });
-  if (!view.busy && !view.delivering && !view.uncertain && view.review && view.reviewedDraft === view.draft && !view.review.corrections.length) {
-    list.push({ key: "send", label: "Send without these suggestions" });
-  }
-  if (!view.delivering && view.draft.trim()) list.push({ key: "bypass", label: view.uncertain ? "Confirm send again…" : "Bypass review and send…" });
+  const canSend = !view.busy && !view.delivering && !view.uncertain && view.review && view.reviewedDraft === view.draft && !view.review.corrections.length;
+  if (canSend) list.push({ key: "send", label: "Send as written" });
+  else if (!view.delivering && view.draft.trim()) list.push({ key: "bypass", label: view.uncertain ? "Confirm send again…" : "Send without passing review…" });
   list.push({ key: "cancel", label: view.attachmentCount ? "Return / discard attachments…" : "Return to main editor" },
     { key: "model", label: "Change reviewer…" }, { key: "toggle", label: view.settings.enabled ? "Turn future reviews off" : "Turn future reviews on" });
   return list;
@@ -176,6 +178,7 @@ export async function showReviewWorkspace(ctx: ExtensionContext, controller: Wor
           const active = focus === "options" && focused && option.key === selected;
           const label = `${active ? "›" : " "} ${option.label}`;
           const hint = option.key === "bypass" ? "confirmation required"
+            : option.key === "send" ? "only optional advice remains"
             : option.key === "model" ? `${safe(view.settings.provider)}/${safe(view.settings.modelId)} · ${safe(view.settings.effort)}`
             : option.key === "toggle" ? "this session only" : "";
           const room = draftWidth - 4 - visibleWidth(label) - visibleWidth(hint);

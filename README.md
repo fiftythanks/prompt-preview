@@ -20,7 +20,7 @@ Default reviewer: **openai-codex/gpt-6.1-terra, Low**. A model appearing in the 
 
 1. Submit `Please add a orange label.`. Read the red struck-through original and green local correction. The draft remains unchanged.
 2. Press **Tab** to focus the draft. Rewrite it yourself, then use your configured submit key to review the revision. A clean revision goes to the target agent.
-3. Submit `Please put the trash in the trash can.`. British-usage suggestions may offer British alternatives; they are optional, not grammatical errors. Use the actions to send without suggestions or rewrite again.
+3. Submit `Please put the trash in the trash can.`. British-usage suggestions offer British alternatives; they are optional, not grammatical errors. **Send as written** ignores optional advice and sends your unchanged draft. Naturalness and conciseness suggestions also show local example rewrites for you to adapt manually.
 4. Try a spelling error, `organize`, code, paths and quoted American wording. Protected content must not become a compulsory rewrite.
 5. Use `/prompt-review change-model`: type to filter, choose a model, then choose its effort. Escape from either step cancels without saving.
 6. Try `/prompt-review off`, `/prompt-review on` and `/prompt-review status`.
@@ -34,14 +34,14 @@ Default reviewer: **openai-codex/gpt-6.1-terra, Low**. A model appearing in the 
 - During a request, the draft is read-only. **Cancel review** aborts the request and unlocks editing.
 - **Escape in draft:** return to review after editor/Vim handling. **Escape in options:** return to review. **Escape in review:** cancel the held prompt.
 - Text-only cancellation restores the current draft to the main input. Attached-prompt cancellation offers to keep editing or explicitly discard the prompt and attachments; the host has no public attachment-chip restore interface.
-- **Bypass review and send** requires confirmation. It is not the normal path for correcting mistakes.
+- **Send as written** is available only after a completed review of the current draft with no corrections remaining. **Send without passing review…** is the separate, confirmed escape when that check has not passed. Only one send option appears at a time; neither changes your wording.
 
 Review, draft and options have separate frames; the active frame and menu selection use the terminal theme's accent colour. Corrections are numbered, with a red struck-through original, a green replacement and an indented explanation. Optional suggestions and descriptive tone have their own headings. Compact terminals give most space to the review, a bounded draft editor underneath and an always-visible options menu at the bottom. Wide terminals put the draft and options beside the review. Too-small viewports show a resize message rather than invisible sending controls.
 
 ## Intentional limits
 
 - No sources, citations, inherited conversation, clarity assessment, reviewer Q&A or automatic rewrites. Explanations are unsourced model judgements.
-- Grammar/spelling/house-style corrections require an actual draft change and another review. Conciseness/naturalness advice is optional and gives no replacement wording. British-usage advice is the exception: it names alternatives without applying them. Uncertain findings are optional; tone is descriptive.
+- Grammar/spelling/house-style corrections require an actual draft change and another review. Conciseness, naturalness and British-usage suggestions are optional and include one or two concrete local examples. They are never applied automatically. Genuinely uncertain language issues may omit an example rather than invent your meaning or alter protected text; the explanation must say why. Tone is descriptive, not prescriptive.
 - Only reviewer/model effort and enabled state persist per session. Drafts, attachments held for review and feedback are memory-only. Resume a session with `bun run prototype --resume <session-id-or-file>`; a new session starts with defaults.
 - The review deadline is 60 seconds. Errors hold the draft; retries and bypass are explicit. There is no silent model substitution.
 - Approved delivery has normal Enter semantics at approval time: idle starts a turn, streaming steers. The input hook cannot preserve the original follow-up shortcut or queue position. Native command/control inputs bypass this extension.

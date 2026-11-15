@@ -94,8 +94,8 @@ export default function promptReviewPrototype(pi: ExtensionAPI) {
   async function deliver(item: Held, bypass: boolean) {
     if (!current(item) || item.state.delivering || !item.state.draft.trim()) return;
     if (bypass) {
-      const answer = await confirmReviewAction(item.ctx, item.state.uncertain ? "Possible duplicate delivery" : "Bypass review?",
-        item.state.uncertain ? "The previous delivery may already have reached the target. Send this draft again anyway?" : "Send your current wording without satisfying the review? Corrections will not be applied.", item.ui.signal);
+      const answer = await confirmReviewAction(item.ctx, item.state.uncertain ? "Possible duplicate delivery" : "Send without passing review?",
+        item.state.uncertain ? "The previous delivery may already have reached the target. Send this draft again anyway?" : "Skip the correction check and send your current draft exactly as written, including any unresolved issues? Nothing will be corrected automatically.", item.ui.signal);
       if (!answer || !current(item)) return;
     } else if (item.state.uncertain || item.state.busy || !item.state.review || item.state.reviewedDraft !== item.state.draft || item.state.review.corrections.length) return;
     item.request?.abort(new Error("Sending user draft"));
@@ -124,7 +124,7 @@ export default function promptReviewPrototype(pi: ExtensionAPI) {
       item.state.mandatoryDraft = review.corrections.length ? draft : null;
       item.state.busy = false;
       if (!review.corrections.length && !review.suggestions.length) { await deliver(item, false); return; }
-      item.state.notice = review.corrections.length ? "Rewrite the corrections below in your draft, then review again." : "Suggestions are optional. Rewrite, or send without these suggestions.";
+      item.state.notice = review.corrections.length ? "Rewrite the corrections below in your draft, then review again." : "No corrections remain. Suggestions are optional: choose Send as written, or revise again.";
     } catch (error) {
       if (!current(item) || item.request !== request || request.signal.aborted) return;
       item.state.error = message(error);
