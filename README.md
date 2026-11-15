@@ -19,7 +19,7 @@ Default reviewer: **openai-codex/gpt-6.1-terra, Low**. A model appearing in the 
 ## Try it
 
 1. Submit `Please add a orange label.`. Read the red struck-through original and green local correction. The draft remains unchanged.
-2. Press **F6** to focus the draft. Rewrite it yourself, then use your configured submit key to review the revision. A clean revision goes to the target agent.
+2. Press **Tab** to focus the draft. Rewrite it yourself, then use your configured submit key to review the revision. A clean revision goes to the target agent.
 3. Submit `Please put the trash in the trash can.`. British-usage suggestions may offer British alternatives; they are optional, not grammatical errors. Use the actions to send without suggestions or rewrite again.
 4. Try a spelling error, `organize`, code, paths and quoted American wording. Protected content must not become a compulsory rewrite.
 5. Use `/prompt-review change-model`: type to filter, choose a model, then choose its effort. Escape from either step cancels without saving.
@@ -27,15 +27,16 @@ Default reviewer: **openai-codex/gpt-6.1-terra, Low**. A model appearing in the 
 
 ### Controls
 
-- **F6:** switch feedback/draft focus. Feedback scrolls independently.
-- **Tab / Shift+Tab / Left / Right in feedback:** choose an action; **Enter:** activate it.
+- **Tab / Shift+Tab:** cycle forwards/backwards through **Review → Your draft → Options**. **F6** remains a forward-focus shortcut.
+- **Review:** Up/Down and page-scroll keys scroll feedback without changing the selected option.
+- **Options:** every option is visible; **Up/Down** selects and **Enter** activates. Bypass is labelled separately and still requires confirmation. **Edit draft first** takes focus straight to the draft.
 - **Submit in draft:** review your revision; it never applies the green wording for you.
 - During a request, the draft is read-only. **Cancel review** aborts the request and unlocks editing.
-- **Escape in draft:** return to feedback after editor/Vim handling. **Escape in feedback:** cancel the held prompt.
+- **Escape in draft:** return to review after editor/Vim handling. **Escape in options:** return to review. **Escape in review:** cancel the held prompt.
 - Text-only cancellation restores the current draft to the main input. Attached-prompt cancellation offers to keep editing or explicitly discard the prompt and attachments; the host has no public attachment-chip restore interface.
 - **Bypass review and send** requires confirmation. It is not the normal path for correcting mistakes.
 
-The header exposes review/draft status, revision and attachment count. The reviewer/effort and future-review toggle remain visible. Wide terminals use columns; narrow terminals stack feedback and draft. Too-small viewports show a resize message rather than invisible sending controls.
+Review, draft and options have separate frames; the active frame and menu selection use the terminal theme's accent colour. Corrections are numbered, with a red struck-through original, a green replacement and an indented explanation. Optional suggestions and descriptive tone have their own headings. Compact terminals give most space to the review, a bounded draft editor underneath and an always-visible options menu at the bottom. Wide terminals put the draft and options beside the review. Too-small viewports show a resize message rather than invisible sending controls.
 
 ## Intentional limits
 
@@ -62,6 +63,7 @@ Exercised with installed omp 18.20.0 and real Codex Terra/Low requests:
 - Off plus reviewer selection survived an actual exit/resume. A new session returned to enabled Codex Terra/Low.
 - Both stacked and side-by-side layouts were observed. The terminal ANSI capture contained strikethrough and red/green palette styling.
 - Synthetic target journals contained only the three approved payloads, not reviewer explanations.
+- Compact redesign exercised at 96 columns × 40 rows on omp 18.20.2: all options stayed visible; Tab cycled review → draft → options → review and Shift+Tab reversed it. Arrow keys selected options only inside the options frame; review scrolling left the draft and menu in place. **Edit draft first** focused the editor. A manual rewrite was re-reviewed and delivered to the synthetic target.
 
 Evidence is terminal-state/text and ANSI capture, not screenshots. Attachment controls, branch-change confirmation, tiny-terminal behaviour and provider-specific failure varieties have not all been manually exercised.
 

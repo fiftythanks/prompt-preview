@@ -124,7 +124,7 @@ export default function promptReviewPrototype(pi: ExtensionAPI) {
       item.state.mandatoryDraft = review.corrections.length ? draft : null;
       item.state.busy = false;
       if (!review.corrections.length && !review.suggestions.length) { await deliver(item, false); return; }
-      item.state.notice = review.corrections.length ? "Read the corrections, then F6 to rewrite your draft. Nothing is applied automatically." : "Suggestions are optional. Rewrite, or send without these suggestions.";
+      item.state.notice = review.corrections.length ? "Rewrite the corrections below in your draft, then review again." : "Suggestions are optional. Rewrite, or send without these suggestions.";
     } catch (error) {
       if (!current(item) || item.request !== request || request.signal.aborted) return;
       item.state.error = message(error);
