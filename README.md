@@ -45,6 +45,7 @@ Default reviewer: **openai-codex/gpt-6.1-terra, Medium**. A model appearing in t
 - **Review:** Up/Down and page-scroll keys scroll feedback without changing the selected option.
 - **Options:** every option is visible; **Up/Down** selects and **Enter** activates. Bypass is labelled separately and still requires confirmation. **Edit draft first** takes focus straight to the draft.
 - **Submit in draft:** review your revision; it never applies the green wording for you.
+- Global terminal key remappers, including an installed Emacs-key extension, run before ordinary review-editor and menu keys. Tab/Shift+Tab/F6 remain workspace controls; paste and submission stay with the active review editor rather than the background composer.
 - During a request, the draft is read-only. **Cancel review** aborts the request and unlocks editing.
 - **Escape in draft:** return to review after editor/Vim handling. **Escape in options:** return to review. **Escape in review:** cancel the held prompt.
 - Text-only cancellation restores the current draft to the main input. Attached-prompt cancellation offers to keep editing or explicitly discard the prompt and attachments; the host has no public attachment-chip restore interface.
@@ -60,7 +61,7 @@ Review, draft and options have separate frames; the active frame and menu select
 - The review deadline is 60 seconds. Errors hold the draft; retries and bypass are explicit. There is no silent model substitution.
 - Approved delivery has normal Enter semantics at approval time: idle starts a turn, streaming steers. The input hook cannot preserve the original follow-up shortcut or queue position. Native command/control inputs bypass this extension.
 - Preserve text as represented by omp's editor, not raw pre-normalisation paste bytes. Detection of unmarked technical names and meaning still depends on model judgement.
-- This prototype has no automated test suite. Judge it by trying the actual surface and record a verdict before any production implementation.
+- Focused regression tests cover global Emacs remapping in the draft/options/confirmation and multiline-paste isolation: `bun test tests/review-keybindings.test.ts`. This is not a comprehensive behavioural suite; native surface checks and real-work evaluation remain important.
 
 `docs/prompt-review-plan.md` records the design being explored. No findings from the abandoned teaching-workflow prototype establish correctness here.
 

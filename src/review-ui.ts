@@ -159,7 +159,10 @@ export async function showReviewWorkspace(ctx: ExtensionContext, controller: Wor
     return {
       get focused() { return focused; },
       set focused(value: boolean) { focused = value; updateFocus(); },
-      capturesInput() { return true; },
+      // Reserve only workspace gestures and raw paste. Let global remappers see editing keys first.
+      capturesInput(data: string) {
+        return pasted || data.includes("\x1b[200~") || /[\r\n]/u.test(data) || matchesKey(data, "tab") || matchesKey(data, "shift+tab") || matchesKey(data, "f6");
+      },
       render(width: number): string[] {
         const height = Math.max(1, tui.terminal.rows - 2);
         const options = actions(view);
@@ -216,6 +219,10 @@ export async function showReviewWorkspace(ctx: ExtensionContext, controller: Wor
           if (!view.busy && !view.delivering) editor.handleInput(data);
           tui.requestRender(); return;
         }
+        if (focus === "draft" && data.length > 1 && /[\r\n]/u.test(data)) {
+          if (!view.busy && !view.delivering) editor.pasteText(data);
+          tui.requestRender(); return;
+        }
         if (matchesKey(data, "tab") || matchesKey(data, "f6")) { moveFocus(1); return; }
         if (matchesKey(data, "shift+tab")) { moveFocus(-1); return; }
         if (focus === "draft") {
@@ -251,7 +258,6 @@ export async function confirmReviewAction(ctx: ExtensionContext, title: string, 
     list.onSelect = item => done(item.value === "yes");
     list.onCancel = () => done(false);
     return {
-      capturesInput() { return true; },
       render(width: number) { return [bold(safe(title)), "", ...wrapTextWithAnsi(safe(description), Math.max(1, width)), "", ...list.render(width)]; },
       invalidate() { list.invalidate(); },
       handleInput(data: string) { list.handleInput(data); tui.requestRender(); },
