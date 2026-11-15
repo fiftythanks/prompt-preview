@@ -36,6 +36,18 @@ function feedback(view: WorkspaceView, width: number, ink: Ink): string[] {
     }
     if (view.review.corrections.length) {
       section(`Corrections · ${view.review.corrections.length}`);
+      if (view.reviewedDraft !== null) {
+        const original = view.reviewedDraft;
+        let marked = "";
+        let cursor = 0;
+        for (const correction of [...view.review.corrections].sort((a, b) => a.start - b.start)) {
+          marked += safe(original.slice(cursor, correction.start)) + red(original.slice(correction.start, correction.end));
+          cursor = correction.end;
+        }
+        marked += safe(original.slice(cursor));
+        lines.push("", bold("Original prompt · errors marked"));
+        paragraph(marked);
+      }
       view.review.corrections.forEach((correction, index) => {
         const label = correction.category === "house_style" ? "House style · your preference" : correction.category === "grammar" ? "Grammar" : "Spelling";
         lines.push("", bold(`${index + 1}. ${label}`));
