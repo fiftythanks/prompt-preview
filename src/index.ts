@@ -1,4 +1,4 @@
-// THROWAWAY native extension. Question: does this real manual-rewrite workflow feel right?
+// Experimental native prompt-review extension, installed for a real-work trial.
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 import type { ImageContent } from "@oh-my-pi/pi-ai";
 import type { WorkspaceAction, WorkspaceController, WorkspaceView, ReviewSettings } from "./contract";
@@ -28,7 +28,7 @@ export default function promptReviewPrototype(pi: ExtensionAPI) {
   let settingsMutation: Promise<void> = Promise.resolve();
 
   function status(ctx = lastContext) {
-    ctx?.ui.setStatus("prompt-review", `PROTOTYPE · review ${settings.enabled ? "on" : "off"} · ${settings.provider}/${settings.modelId} ${settings.effort}${active ? " · held" : ""}${queue.length ? ` · ${queue.length} queued` : ""}`);
+    ctx?.ui.setStatus("prompt-review", `Review ${settings.enabled ? "on" : "off"} · ${settings.provider}/${settings.modelId} ${settings.effort}${active ? " · held" : ""}${queue.length ? ` · ${queue.length} queued` : ""}`);
   }
   function current(item: Held) { return item.owner === owner && item.epoch === epoch && !item.finished; }
   function emit(item: Held) { item.state.settings = { ...settings }; for (const listener of item.listeners) listener(); status(); }
@@ -194,7 +194,7 @@ export default function promptReviewPrototype(pi: ExtensionAPI) {
     finally { if (active === item) active = undefined; status(); void pump(); }
   }
 
-  pi.on("session_start", async (_event, ctx) => { await initialise(ctx); ctx.ui.notify("THROWAWAY prompt-review prototype · settings only persist; drafts do not", "info"); });
+  pi.on("session_start", async (_event, ctx) => { await initialise(ctx); ctx.ui.notify("Prompt review · session settings persist; unsent drafts do not", "info"); });
   pi.on("session_switch", async (_event, ctx) => { await initialise(ctx); });
   pi.on("session_branch", async (_event, ctx) => { await initialise(ctx); });
   pi.on("session_tree", (_event, ctx) => { lastContext = ctx; status(ctx); });

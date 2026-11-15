@@ -8,7 +8,7 @@ import { getSelectListTheme, SelectList, truncateToWidth } from "@oh-my-pi/pi-tu
 import type { ReviewSettings, ReviewerSelection } from "./contract";
 
 export const DEFAULT_SETTINGS: ReviewSettings = {
-  enabled: true, provider: "openai-codex", modelId: "gpt-6.1-terra", effort: "low",
+  enabled: true, provider: "openai-codex", modelId: "gpt-6.1-terra", effort: "medium",
 };
 
 function supportsOff(model: Model): boolean {

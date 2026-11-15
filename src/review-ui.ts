@@ -177,7 +177,7 @@ export async function showReviewWorkspace(ctx: ExtensionContext, controller: Wor
           ? `${view.review.corrections.length} correction${view.review.corrections.length === 1 ? "" : "s"} · ${view.review.suggestions.length} optional`
           : "Your draft stays unchanged until you edit it";
         const title = `${ink.accent(bold("Prompt review"))}  ${ink.warning(status)}`;
-        const metadata = ink.muted(`${summary}${view.attachmentCount ? ` · ${view.attachmentCount} attachment(s)` : ""} · prototype`);
+        const metadata = ink.muted(`${summary}${view.attachmentCount ? ` · ${view.attachmentCount} attachment(s)` : ""}`);
         if (!usable) return [truncateToWidth(title, width, ""), truncateToWidth("More room needed. Resize to review/edit; Esc returns the draft.", width, "")];
         const reviewWidth = columns ? Math.floor((width - 1) * .58) : width;
         const draftWidth = columns ? width - reviewWidth - 1 : width;

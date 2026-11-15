@@ -1,12 +1,26 @@
-# Native prompt-review prototype — THROWAWAY
+# Prompt review — experimental omp extension
 
 **Question:** does reviewing a real prompt, showing feedback beside it and requiring the user to rewrite it feel right in omp?
 
-This is an experimental native extension, not a browser mock-up or production release. The reviewer really calls the selected provider. It is deliberately kept on `prototype/manual-rewrite`, out of `main`. User verdict: pending.
+This is the working native prototype, now installed as a regular omp extension for a user-authorised real-work trial. The compact UI and manual-rewrite workflow have positive user feedback. The reviewer really calls the selected provider. Development remains on `prototype/manual-rewrite`; this is not a production-readiness claim.
 
-## Run
+## Normal use
 
-Requires the existing omp 18.20.0 installation and Bun 1.4.4 or newer. No npm installation is needed: the launcher links this checkout to the installed matching SDK without changing those packages.
+Start `omp` normally. The global extension lives at `~/.omp/agent/extensions/prompt-review/index.ts` and is enabled for automatic discovery. Restart an already-running omp process to load the replacement; no `-e` flag or prototype launcher is needed.
+
+Default reviewer for a session without saved review settings: **openai-codex/gpt-6.1-terra, Medium**. Existing session-specific selections are preserved. Use `/prompt-review change-model` to change one, `/prompt-review status` to inspect it or `/prompt-review off` to disable future reviews in that session.
+
+Reinstall the six runtime modules from this checkout:
+
+```sh
+make install EXTENSION_DIR="$HOME/.omp/agent/extensions/prompt-review"
+```
+
+Only settings persist per session. Unsent drafts and feedback remain memory-only. The previous installed extension was saved outside the discovery directory under `~/.omp/agent/extension-backups/`.
+
+## Isolated prototype launcher
+
+Verified with the existing omp 18.20.2 installation and Bun 1.4.4. No npm installation is needed: the launcher links this checkout to the installed SDK without changing those packages.
 
 ```sh
 bun run prototype
@@ -14,7 +28,7 @@ bun run prototype
 
 This starts a separate omp process, disables normal extension discovery and loads only this prototype. Your installed extensions and existing sessions are not replaced. Its own sessions live in the ignored `.prototype-sessions/` directory. Reviewer requests use your existing authentication and count towards the selected provider's normal usage.
 
-Default reviewer: **openai-codex/gpt-6.1-terra, Low**. A model appearing in the chooser does not prove that its credentials or quota work.
+Default reviewer: **openai-codex/gpt-6.1-terra, Medium**. A model appearing in the chooser does not prove that its credentials or quota work.
 
 ## Try it
 
@@ -60,10 +74,11 @@ Exercised with installed omp 18.20.0 and real Codex Terra/Low requests:
 - Cancel review unlocked the unchanged draft. Bypass displayed a visible confirmation, defaulted to No and sent only after explicit Yes.
 - Text-only prompt cancellation restored the draft to the main input.
 - The searchable model/effort chooser worked. Cancelling the effort step preserved the old selection. Selecting OpenAI Terra/Low changed the reviewer while the target remained Codex Terra.
-- Off plus reviewer selection survived an actual exit/resume. A new session returned to enabled Codex Terra/Low.
+- Off plus reviewer selection survived an actual exit/resume. A new session returned to enabled Codex Terra/Low, the default at the time of that check.
 - Both stacked and side-by-side layouts were observed. The terminal ANSI capture contained strikethrough and red/green palette styling.
 - Synthetic target journals contained only the three approved payloads, not reviewer explanations.
 - Compact redesign exercised at 96 columns × 40 rows on omp 18.20.2: all options stayed visible; Tab cycled review → draft → options → review and Shift+Tab reversed it. Arrow keys selected options only inside the options frame; review scrolling left the draft and menu in place. **Edit draft first** focused the editor. A manual rewrite was re-reviewed and delivered to the synthetic target.
+- The installed extension was automatically discovered by a normal omp 18.20.2 launch, without `-e`, in a synthetic session. Its new default was Codex Terra/Medium while the target used Low. Grammar feedback held the original; a manual rewrite and re-review delivered the corrected user-authored draft.
 
 Evidence is terminal-state/text and ANSI capture, not screenshots. Attachment controls, branch-change confirmation, tiny-terminal behaviour and provider-specific failure varieties have not all been manually exercised.
 
@@ -72,4 +87,4 @@ Evidence is terminal-state/text and ANSI capture, not screenshots. Attachment co
 1. Model-counted character offsets failed in a live British-usage review. The wire response now selects numbered token anchors; the extension computes UTF-16 spans and verifies the exact original substring. There is no fuzzy matching or automatic repair. Missing-word advice anchors to an existing neighbouring token; it does not require the model to count insertion offsets.
 2. Core confirmation dialogs appeared underneath the custom review overlay. Confirmations now use their own top-level custom overlay, with No selected initially.
 
-These are prototype findings, not user approval of a production design. No production implementation has been merged.
+The user has approved installing the working prototype for real-work evaluation, not a production-readiness claim. No production implementation has been merged.

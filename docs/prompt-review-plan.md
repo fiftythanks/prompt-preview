@@ -74,7 +74,7 @@ Supported commands:
 - `/prompt-review on` and `/prompt-review off`: change this session's enabled state.
 - `/prompt-review change-model`: searchable model chooser, followed by an effort chooser.
 
-Default: enabled, `openai-codex/gpt-6.1-terra`, Low effort. Reviewer selection is independent of the target model. Changing it affects subsequent reviews, not a running request or the target agent. Escape from either chooser leaves all settings unchanged; save model and effort together only after both choices are confirmed.
+Default: enabled, `openai-codex/gpt-6.1-terra`, Medium effort. Reviewer selection is independent of the target model. Changing it affects subsequent reviews, not a running request or the target agent. Escape from either chooser leaves all settings unchanged; save model and effort together only after both choices are confirmed.
 
 Populate the model list from `ctx.models.list()` and display provider/model identity. This is a configured-credential availability check, not proof that a request will succeed. Recheck availability before saving and dispatching. Show supported efforts only, including Off when the model supports it; reject unsupported selections rather than clamping. If the default is unavailable, hold with a concrete reason and allow changing the reviewer. Never silently select another provider.
 
@@ -128,8 +128,8 @@ After explicit implementation authorisation:
 2. Add session settings and the model/effort chooser using the same validators as dispatch.
 3. Implement the controller and feedback/editor screen together, including manual rewrite, suggestions, cancellation and lifecycle semantics.
 4. Package all runtime files and run the focused deterministic checks once after integration.
-5. Exercise an isolated extension in assistant-owned panes of the existing Ghostty/Herdr instance, using synthetic prompts and sessions only. Follow terminal-use instructions and the Herdr skill; do not replace the active global extension or disturb user processes. Verify actual terminal output, not just a successful module import.
-6. Run explicit synthetic provider acceptance with the selected Codex Terra/Low reviewer and existing authentication. Record observed latency, not a promised speed. A quota/auth failure is a reported acceptance gap, not permission to change providers.
+5. The user has authorised installing the working prototype into the active global extension directory for a real-work trial. Verify it in a new isolated session in an assistant-owned pane of the existing Ghostty/Herdr instance, using synthetic prompts only. Follow terminal-use instructions and the Herdr skill; do not restart user processes. Verify automatic discovery and actual terminal output, not just a successful module import.
+6. Run explicit synthetic provider acceptance with the default Codex Terra/Medium reviewer and existing authentication. Record observed latency, not a promised speed. A quota/auth failure is a reported acceptance gap, not permission to change providers.
 
 Deterministic checks must cover:
 
