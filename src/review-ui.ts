@@ -15,6 +15,21 @@ const pad = (text: string, width: number) => {
 
 type Ink = Record<"accent" | "muted" | "warning" | "error" | "success", (text: string) => string>;
 
+function suggestionContext(draft: string, start: number, end: number, ink: Ink) {
+  const before = draft.slice(0, start).split(/\r\n|\r|\n/u);
+  const prefix = Array.from(before.at(-1) ?? "");
+  const suffix = Array.from(draft.slice(end).split(/\r\n|\r|\n/u, 1)[0] ?? "");
+  const lastLine = before.length + draft.slice(start, end).split(/\r\n|\r|\n/u).length - 1;
+  const location = lastLine === before.length
+    ? `Reviewed line ${before.length}, column ${prefix.length + 1}`
+    : `Reviewed lines ${before.length}–${lastLine}, starting column ${prefix.length + 1}`;
+  // Keep the full anchored span; bound only its single-line surroundings.
+  const excerpt = `${prefix.length > 60 ? "…" : ""}${safe(prefix.slice(-60).join(""))}`
+    + ink.accent(bold(`⟦${safe(shown(draft.slice(start, end)))}⟧`))
+    + `${safe(suffix.slice(0, 60).join(""))}${suffix.length > 60 ? "…" : ""}`;
+  return { location, excerpt };
+}
+
 function feedback(view: WorkspaceView, width: number, ink: Ink): string[] {
   const lines: string[] = [];
   const paragraph = (text: string, indent = "  ") => {
@@ -62,7 +77,11 @@ function feedback(view: WorkspaceView, width: number, ink: Ink): string[] {
       view.review.suggestions.forEach((suggestion, index) => {
         const label = suggestion.category.replaceAll("_", " ");
         lines.push("", bold(`${index + 1}. ${label[0]?.toUpperCase()}${label.slice(1)}`));
-        paragraph(ink.muted(`“${safe(shown(suggestion.original))}”`));
+        if (view.reviewedDraft !== null) {
+          const { location, excerpt } = suggestionContext(view.reviewedDraft, suggestion.start, suggestion.end, ink);
+          paragraph(ink.muted(location));
+          paragraph(excerpt);
+        } else paragraph(ink.muted(`“${safe(shown(suggestion.original))}”`));
         paragraph(safe(suggestion.explanation));
         for (const alternative of suggestion.alternatives) {
           const label = suggestion.category === "british_usage" ? "British alternative" : "Example rewrite";

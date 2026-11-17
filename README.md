@@ -53,6 +53,8 @@ Default reviewer: **openai-codex/gpt-6.1-terra, Medium**. A model appearing in t
 
 Review, draft and options have separate frames; the active frame and menu selection use the terminal theme's accent colour. The Corrections section first shows the full original reviewed prompt with each erroneous span in red strikethrough, so even a punctuation-only error can be located in context. Numbered explanations follow, with the original, a green replacement and an indented explanation. This original remains tied to the completed review when you edit the draft; stale feedback is labelled. Optional suggestions and descriptive tone have their own headings. Compact terminals give most space to the review, a bounded draft editor underneath and an always-visible options menu at the bottom. Wide terminals put the draft and options beside the review. Too-small viewports show a resize message rather than invisible sending controls.
 
+Optional suggestions identify their exact passage in a context excerpt: `⟦…⟧` marks the affected text, while surrounding wording distinguishes repeated phrases. Each gives its reviewed line and column; multiline spans give a line range and show line breaks as `↵`. Logical lines and Unicode-code-point columns count from 1, independent of terminal wrapping. Locations remain tied to the reviewed version after edits; re-review to refresh them. No example rewrite is applied automatically.
+
 ## Intentional limits
 
 - No sources, citations, inherited conversation, clarity assessment, reviewer Q&A or automatic rewrites. Explanations are unsourced model judgements.
@@ -61,7 +63,7 @@ Review, draft and options have separate frames; the active frame and menu select
 - The review deadline is 60 seconds. Errors hold the draft; retries and bypass are explicit. There is no silent model substitution.
 - Approved delivery has normal Enter semantics at approval time: idle starts a turn, streaming steers. The input hook cannot preserve the original follow-up shortcut or queue position. Native command/control inputs bypass this extension.
 - Preserve text as represented by omp's editor, not raw pre-normalisation paste bytes. Detection of unmarked technical names and meaning still depends on model judgement.
-- Focused regression tests cover global Emacs remapping in the draft/options/confirmation and multiline-paste isolation: `bun test tests/review-keybindings.test.ts`. This is not a comprehensive behavioural suite; native surface checks and real-work evaluation remain important.
+- Focused regression tests cover global Emacs remapping in the draft/options/confirmation, multiline-paste isolation and suggestion locations across repeated phrases, Unicode, multiline spans and stale feedback: `bun test tests/review-keybindings.test.ts`. This is not a comprehensive behavioural suite; native surface checks and real-work evaluation remain important.
 
 `docs/prompt-review-plan.md` records the design being explored. No findings from the abandoned teaching-workflow prototype establish correctness here.
 

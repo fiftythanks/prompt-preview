@@ -12,7 +12,7 @@ class InputTerminal extends ProcessTerminal {
   override get rows() { return 40; }
 }
 
-function harness() {
+function harness(initial: Partial<WorkspaceView> = {}) {
   const terminal = new InputTerminal();
   const tui = new TUI(terminal);
   let component: Component & { dispose?(): void };
@@ -25,6 +25,7 @@ function harness() {
     review: { corrections: [{ id: "spelling", category: "spelling", start: 0, end: 5, original: "alpha", replacement: "Alpha", explanation: "Synthetic correction." }], suggestions: [], tone: "Neutral." },
     busy: false, delivering: false, uncertain: false, error: null, notice: null,
     attachmentCount: 0, settings: { enabled: true, provider: "openai-codex", modelId: "gpt-6.1-terra", effort: "medium" },
+    ...initial,
   };
   const controller: WorkspaceController = {
     view: () => view,
@@ -56,6 +57,7 @@ function harness() {
   return {
     ctx, controller, view, actions,
     key(data: string) { terminal.input(data); component.render(96); },
+    render() { return Bun.stripANSI(component.render(96).join("\n")); },
     close() { component?.dispose?.(); finish(undefined); tui.stop(); },
   };
 }
@@ -100,6 +102,55 @@ test("multiline draft paste stays in the review editor, not a background compose
     app.key("\t");
     app.key("one\ntwo");
     expect(app.view.draft).toBe("alpha\nbravoone\ntwo");
+    expect(app.actions).toEqual([]);
+  } finally { app.close(); await workspace; }
+});
+
+test("suggestions locate the anchored occurrence in context, even after the draft changes", async () => {
+  const draft = [
+    "# Plan", "", "Earlier: intend on changing the label.", "Keep this paragraph unchanged.",
+    "Next 🧭: I intend on changing the parser, not the label.",
+    ...Array(30).fill("Other instructions remain unchanged."),
+  ].join("\n");
+  const original = "intend on changing";
+  const start = draft.lastIndexOf(original);
+  const app = harness({
+    draft, reviewedDraft: draft, mandatoryDraft: null,
+    review: { corrections: [], suggestions: [{
+      id: "naturalness", category: "naturalness", start, end: start + original.length, original,
+      explanation: "Use the more natural construction.", alternatives: ["intend to change"], uncertainty: null,
+    }], tone: "Neutral." },
+  });
+  const workspace = showReviewWorkspace(app.ctx, app.controller, new AbortController().signal);
+  try {
+    expect(app.render()).toContain("Reviewed line 5, column 11");
+    expect(app.render()).toContain("Next 🧭: I ⟦intend on changing⟧ the parser, not the label.");
+    expect(app.render()).not.toContain("Earlier: ⟦intend on changing⟧");
+    app.controller.setDraft(`New heading\n${draft}`);
+    expect(app.render()).toContain("Reviewed line 5, column 11");
+    expect(app.render()).toContain("previous wording");
+    expect(app.view.draft).toBe(`New heading\n${draft}`);
+  } finally { app.close(); await workspace; }
+});
+
+test("multiline uncertain suggestions retain their full span and reviewed line range", async () => {
+  const draft = "# Plan\r\n\r\nWe intend\r\nto change the parser.\r\nDone.";
+  const original = "intend\r\nto change";
+  const start = draft.indexOf(original);
+  const app = harness({
+    draft, reviewedDraft: draft, mandatoryDraft: null,
+    review: { corrections: [], suggestions: [{
+      id: "line-break", category: "possible_issue", start, end: start + original.length, original,
+      explanation: "The split phrasing may be intentional.", alternatives: [],
+      uncertainty: "Context may justify the line break.",
+    }], tone: "Neutral." },
+  });
+  const workspace = showReviewWorkspace(app.ctx, app.controller, new AbortController().signal);
+  try {
+    expect(app.render()).toContain("Reviewed lines 3–4, starting column 4");
+    expect(app.render()).toContain("We ⟦intend ↵ to change⟧ the parser.");
+    expect(app.render()).toContain("Context may justify the line break.");
+    expect(app.view.draft).toBe(draft);
     expect(app.actions).toEqual([]);
   } finally { app.close(); await workspace; }
 });
